@@ -10,6 +10,7 @@
 #define HEADER_LENGTH (3) 
 #define HANDSHAKE_PACKET (0x21)
 #define HANDSHAKE_PACKET_LEN (14)
+#define MAX_PACKET_LENGTH (80)
 
 #define UART_TOGGLE_GPIO (11)
 
@@ -32,7 +33,10 @@ private:
 	const int uid;
 	const int src_id;
 	HalfDuplexUart uart;
-	void performHandshake(int dest_id);
+
+	void performHandshake();
+	void addCRC(uint8_t* buf, int maxLength);
+	bool verifyPacket(uint8_t* buff, int length);
 
 };
 
