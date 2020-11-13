@@ -22,7 +22,7 @@ uint16_t Crc16(uint16_t crc, uint8_t data){
 }
 
 
-SRXL2Receiver::SRXL2Receiver(): uid(rand()), src_id(0x30), uart(1,2,3){
+SRXL2Receiver::SRXL2Receiver(): uid(rand()), src_id(0x30), uart(7, "/dev/ttyAMA0"){
 	
 }
 
@@ -31,16 +31,19 @@ void SRXL2Receiver::performHandshake() {
 	int dest_id = -1;
 
 	while(dest_id == -1) {
-		if(this->uart.receive() == SRXL_MANUFACTURE_ID) {
-			uint8_t type = this->uart.receive();
-			uint8_t length = this->uart.receive();
+		uint8_t value;
+		int read = this->uart.receive(&value);
+
+		if(read > 0 && value == SRXL_MANUFACTURE_ID) {
+			uint8_t type = this->uart.blockingReceive();
+			uint8_t length = this->uart.blockingReceive();
 			uint8_t recBuf[MAX_PACKET_LENGTH];
 
 			recBuf[0] = SRXL_MANUFACTURE_ID;
 			recBuf[1] = type;
 			recBuf[2] = length;
 			for(int i = 3; i < length; i++)
-				recBuf[i] = this->uart.receive();
+				recBuf[i] = this->uart.blockingReceive();
 
 			if(this->verifyPacket(recBuf, length)) {
 				if(type == HANDSHAKE_PACKET) {
@@ -50,6 +53,8 @@ void SRXL2Receiver::performHandshake() {
 				
 				}
 			}
+		} else {
+			sleep(1);
 		}
 	}
 

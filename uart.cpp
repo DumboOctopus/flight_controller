@@ -12,6 +12,7 @@
 int OUTPUT,INPUT = 1;
 void pinMode(int i, int x){}
 void digitalWrite(int i, int x){}
+void wiringPiSetup(){}
 #endif
 
 
@@ -61,6 +62,13 @@ int HalfDuplexUart::send(uint8_t* buffer, int length){
 int HalfDuplexUart::receive(uint8_t* buf) {
 	int rx_length = read(m_uart_fd, (void*)buf, 1);		//Filestream, buffer to store in, number of bytes to read (max)
 	return rx_length;
+}
+
+uint8_t HalfDuplexUart::blockingReceive(){
+	uint8_t out;
+	while(this->receive(&out) < 1)
+		sleep(1);
+	return out;
 }
 
 HalfDuplexUart::~HalfDuplexUart() {

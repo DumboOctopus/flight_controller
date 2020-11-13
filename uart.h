@@ -9,7 +9,9 @@ class HalfDuplexUart {
 public:
 	HalfDuplexUart(int togglePin, std::string uartDevName);
 	int send(uint8_t* buffer, int length);
+	uint8_t blockingReceive();
 	int receive(uint8_t* buf);
+
 	~HalfDuplexUart();
 private:
 	int m_togglePin;
