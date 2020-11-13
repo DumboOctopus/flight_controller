@@ -14,7 +14,6 @@ int main(){
 		if(bindButtonPressed()) {
 			//receiver.bind();
 		}
-		sleep(500); // allow the receiver thread to run
 	}
 
 	while(true) {

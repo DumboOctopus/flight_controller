@@ -4,7 +4,7 @@ default:
 dummy:
 	g++ uart.cpp uart.h uartTest.cpp -DDUMMY=1
 uart:
-	g++ uart.cpp uart.h uartTest.cpp
+	g++ uart.cpp uart.h uartTest.cpp -lwiringPi -Wall -o utest.o
 
 clean:
 	rm *.gch flight.o

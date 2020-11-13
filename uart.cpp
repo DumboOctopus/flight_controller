@@ -19,6 +19,7 @@ void digitalWrite(int i, int x){}
 HalfDuplexUart::HalfDuplexUart(int togglePin, std::string uartDev): 
 m_togglePin(togglePin) {
 
+	wiringPiSetup();
 	pinMode(m_togglePin, OUTPUT);		// Configure GPIO0 as an output
 	digitalWrite(m_togglePin, 1); // 1 is needed for reading
 	
