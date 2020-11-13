@@ -2,6 +2,7 @@
 #include "receiver.h"
 #include <stdio.h>
 #include <unistd.h>			//Used for UART
+#include <iostream>
 #include <fcntl.h>			//Used for UART
 #include <termios.h>		//Used for UART
 #include <stdio.h>          //memcpy
@@ -23,11 +24,12 @@ uint16_t Crc16(uint16_t crc, uint8_t data){
 
 
 SRXL2Receiver::SRXL2Receiver(): uid(rand()), src_id(0x30), uart(7, "/dev/ttyAMA0"){
-	
+	performHandshake();	
 }
 
 void SRXL2Receiver::performHandshake() {
 	
+	std::cout << "here" << std::endl;
 	int dest_id = -1;
 
 	while(dest_id == -1) {
@@ -36,6 +38,7 @@ void SRXL2Receiver::performHandshake() {
 
 		if(read > 0 && value == SRXL_MANUFACTURE_ID) {
 			uint8_t type = this->uart.blockingReceive();
+			
 			uint8_t length = this->uart.blockingReceive();
 			uint8_t recBuf[MAX_PACKET_LENGTH];
 
@@ -48,9 +51,12 @@ void SRXL2Receiver::performHandshake() {
 			if(this->verifyPacket(recBuf, length)) {
 				if(type == HANDSHAKE_PACKET) {
 					Handshake inHandshake;
-					memcpy(&inHandshake, &recBuf, HANDSHAKE_PACKET_LEN);
+					memcpy(&inHandshake, recBuf+HEADER_LENGTH, HANDSHAKE_PACKET_LEN-HEADER_LENGTH);
 					dest_id = inHandshake.src_id;
 				
+					
+				} else {
+					return; // no need to do handshake
 				}
 			}
 		} else {
@@ -58,6 +64,7 @@ void SRXL2Receiver::performHandshake() {
 		}
 	}
 
+	std::cout << dest_id << std::endl;
 
 	Handshake handshake;
 	handshake.src_id = this->src_id;
@@ -72,15 +79,20 @@ void SRXL2Receiver::performHandshake() {
 	buf[1] = HANDSHAKE_PACKET;
 	buf[2] = HANDSHAKE_PACKET_LEN;
 	memcpy(
-		&buf + HEADER_LENGTH, 
+		buf + HEADER_LENGTH, 
 		(const void *) &handshake, 
 		sizeof(Handshake)
 	);
 
 	this->addCRC(buf, HANDSHAKE_PACKET_LEN);
-	this->uart.send(buf, HANDSHAKE_PACKET_LEN);
+	int sent = this->uart.send(buf, HANDSHAKE_PACKET_LEN);
+	std::cout << "Sent n bytes:" << sent << std::endl;
+	std::cout << "Verify own packet: " <<  verifyPacket(buf, HANDSHAKE_PACKET_LEN) << std::endl;
+	for(int i = 0; i < HANDSHAKE_PACKET_LEN; ++i){
+		std::cout << (int) buf[i] << " ";
+	}
+	std::cout << std::endl;
 
-	
 }
 
 void SRXL2Receiver::addCRC(uint8_t* buf, int maxLength) {

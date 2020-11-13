@@ -25,6 +25,7 @@ m_togglePin(togglePin) {
 	digitalWrite(m_togglePin, 1); // 1 is needed for reading
 	
 	m_uart_fd = open(uartDev.c_str(), O_RDWR | O_NOCTTY | O_NDELAY);		//Open in non blocking read/write mode
+	sleep(1);
 	if (m_uart_fd == -1)
 	{
 		//ERROR - CAN'T OPEN SERIAL PORT
@@ -55,6 +56,8 @@ m_togglePin(togglePin) {
 int HalfDuplexUart::send(uint8_t* buffer, int length){
 	digitalWrite(m_togglePin, 0); // 0 for writing
 	int bytesWritten = write(m_uart_fd, buffer, length);
+	usleep(1000);
+	tcflush(m_uart_fd, TCOFLUSH);
 	digitalWrite(m_togglePin, 1); // 1 is needed for reading
 	return bytesWritten;
 }

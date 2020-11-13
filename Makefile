@@ -1,6 +1,6 @@
 
 default:
-	g++ receiver.cpp uart.cpp main.cpp receiver.h uart.h -o flight.o
+	g++ receiver.cpp uart.cpp main.cpp receiver.h uart.h -lwiringPi -o flight.o
 dummy:
 	g++ receiver.cpp uart.cpp main.cpp receiver.h uart.h -o flight.o -DDUMMY=1
 uart:
