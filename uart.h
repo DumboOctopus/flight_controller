@@ -3,16 +3,21 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <iostream>
 
 class HalfDuplexUart {
 public:
-	HalfDuplexUart(int togglePin, int rx, int tx);
-	bool send(uint8_t* buffer, int length);
-	uint8_t receive();
+	HalfDuplexUart(int togglePin, std::string uartDevName);
+	int send(uint8_t* buffer, int length);
+	int receive(uint8_t* buf);
+	~HalfDuplexUart();
 private:
 	int m_togglePin;
-	int m_rx;
-	int m_tx;
+	int m_uart_fd;
+
+	uint8_t buffer[255];
+	int readIndex;
+	int writeIndex;
 };
 
 #endif
